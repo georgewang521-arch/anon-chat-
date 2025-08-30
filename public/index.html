@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>匿名聊天</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 0; }
+    #chat { max-width: 600px; margin: 50px auto; background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    #messages { list-style-type: none; padding: 0; margin: 0; max-height: 400px; overflow-y: auto; }
+    #messages li { padding: 5px 10px; margin-bottom: 5px; border-radius: 5px; }
+    #messages li.self { background: #d1f7d6; text-align: right; }
+    #messages li.other { background: #f1f1f1; text-align: left; }
+    #form { display: flex; margin-top: 10px; }
+    #input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    #send { padding: 10px; border: none; background: #007bff; color: white; border-radius: 5px; margin-left: 5px; cursor: pointer; }
+    #send:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <div id="chat">
+    <h2>匿名聊天室 🎭</h2>
+    <ul id="messages"></ul>
+    <form id="form">
+      <input id="input" autocomplete="off" placeholder="输入消息..." />
+      <button id="send">发送</button>
+    </form>
+  </div>
+
+  <!-- Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const messages = document.getElementById('messages');
+
+    socket.on('chatMessage', (data) => {
+      const item = document.createElement('li');
+      item.textContent = data.msg;
+      item.className = data.id === socket.id ? 'self' : 'other';
+      messages.appendChild(item);
+      messages.scrollTop = messages.scrollHeight;
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (input.value) {
+        socket.emit('chatMessage', input.value);
+        input.value = '';
+      }
+    });
+  </script>
+</body>
+</html>
